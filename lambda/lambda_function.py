@@ -14,13 +14,13 @@ from openai import OpenAI
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-openai_api_key = "SUBSTITUA-POR-SUA-API-KEY-DA-OPENAI"
+openai_api_key = "openai-secret-key"
 
 client = OpenAI(api_key=openai_api_key)
 
-MODEL = "gpt-4-1106-preview"
+MODEL = "gpt-3.5-turbo"
 
-messages = [{"role": "system", "content": "Você é uma assistente muito útil. Por favor, responda de forma clara e concisa em Português do Brasil."}]
+messages = [{"role": "system", "content": "You are a smart assistant. Please, respond clearly and concisely in English (US)."}]
 
 class LaunchRequestHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
@@ -30,7 +30,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speak_output = "Bem vindo ao Chat 'Gepetê Quatro' da 'Open ei ai'! Qual a sua pergunta?"
+        speak_output = "Mode activated, proceed."
 
         return (
             handler_input.response_builder
@@ -53,7 +53,7 @@ class GptQueryIntentHandler(AbstractRequestHandler):
         return (
                 handler_input.response_builder
                     .speak(response)
-                    .ask("Você pode fazer uma nova pergunta ou falar: sair.")
+                    .ask("You can ask a new question, or say: exit.")
                     .response
             )
 
@@ -63,12 +63,12 @@ def generate_gpt_response(query):
         messages.append(
             {"role": "user", "content": query},
         )
-        response = client.chat.completions.create(model=MODEL, messages=messages, max_tokens=700, temperature=0.8)
+        response = client.chat.completions.create(model=MODEL, messages=messages, max_tokens=4096 , temperature=0.4)
         reply = response.choices[0].message.content
         messages.append({"role": "assistant", "content": reply})
         return reply
     except Exception as e:
-        return f"Erro ao gerar resposta: {str(e)}"
+        return f"Error generating the response: {str(e)}"
 
 
 class HelpIntentHandler(AbstractRequestHandler):
@@ -78,7 +78,7 @@ class HelpIntentHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speak_output = "Como posso te ajudar?"
+        speak_output = "How can I help you?"
 
         return (
             handler_input.response_builder
@@ -96,7 +96,7 @@ class CancelOrStopIntentHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speak_output = "Até logo!"
+        speak_output = "See you!"
 
         return (
             handler_input.response_builder
@@ -127,7 +127,7 @@ class CatchAllExceptionHandler(AbstractExceptionHandler):
         # type: (HandlerInput, Exception) -> Response
         logger.error(exception, exc_info=True)
 
-        speak_output = "Desculpe, não consegui processar sua solicitação."
+        speak_output = "Sorry, I couldn't process your request."
 
         return (
             handler_input.response_builder
